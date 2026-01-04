@@ -8,8 +8,9 @@
 	"main": "src/index.ts",
 	"compatibility_date": "2026-01-03",
 	"observability": {
-		"enabled": true
-	}
+		"enabled": true,
+	},
+	"r2_buckets": [{ "binding": "RECOLLECTION_BUCKET", "bucket_name": "recollection" }],
 	/**
 	 * Smart Placement
 	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
