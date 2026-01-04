@@ -1,14 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-
-export interface Memory {
-  id: string;
-  imageUrl: string;
-  title: string;
-  capturedAt: string;
-  location?: string;
-}
+import type { Memory } from "@/lib/types/neon";
 
 export interface MemoryPosition {
   memory: Memory;
@@ -40,7 +33,7 @@ function parseDate(dateStr: string): Date {
     december: 11,
   };
 
-  const parts = dateStr.toLowerCase().split(" ");
+  const parts = String(dateStr).toLowerCase().split(" ");
   const month = months[parts[0]] ?? 0;
   const year = parseInt(parts[1]) || 2024;
 
@@ -65,7 +58,7 @@ export function useMemoryLayout({
     // Parse dates and find range
     const memoriesWithDates = memories.map((m) => ({
       memory: m,
-      date: parseDate(m.capturedAt),
+      date: parseDate(m.date),
     }));
 
     const dates = memoriesWithDates.map((m) => m.date.getTime());

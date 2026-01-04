@@ -8,13 +8,24 @@ import { useEffect } from "react";
 interface LightboxProps {
   isOpen: boolean;
   onClose: () => void;
-  imageUrl: string;
+  imageUrl?: string;
   title: string;
   capturedAt: string;
   location?: string;
 }
 
-export function Lightbox({ isOpen, onClose, imageUrl, title, capturedAt, location }: LightboxProps) {
+export function Lightbox({
+  isOpen,
+  onClose,
+  imageUrl,
+  title,
+  capturedAt,
+  location,
+}: LightboxProps) {
+  if (!process.env.NEXT_PUBLIC_CDN_URL) {
+    throw new Error("NEXT_PUBLIC_CDN_URL is not defined");
+  }
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -61,7 +72,7 @@ export function Lightbox({ isOpen, onClose, imageUrl, title, capturedAt, locatio
             <div className="flex flex-col md:flex-row gap-6 bg-card rounded-sm overflow-hidden shadow-2xl">
               <div className="relative flex-1 aspect-square md:aspect-auto">
                 <Image
-                  src={imageUrl}
+                  src={process.env.NEXT_PUBLIC_CDN_URL + imageUrl}
                   alt={title}
                   fill
                   className="object-contain"
@@ -76,7 +87,7 @@ export function Lightbox({ isOpen, onClose, imageUrl, title, capturedAt, locatio
                     {title}
                   </h2>
                   <div className="space-y-2 font-mono text-sm text-muted-foreground">
-                    <p>{capturedAt}</p>
+                    <p>{String(capturedAt)}</p>
                     {location && <p>{location}</p>}
                   </div>
                 </div>

@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { useMemo, useState, useEffect } from "react";
 import { calculateDepthEffects } from "@/lib/utils";
-import type { Memory } from "./hooks/useMemoryLayout";
+import type { Memory } from "@/lib/types/neon";
 import { Emphasis } from "../ui/fabula/emphasis";
 
 interface DepthMemoryCardProps {
@@ -130,8 +130,8 @@ export function DepthMemoryCard({
         }}
       >
         <Image
-          src={memory.imageUrl}
-          alt={memory.title}
+          src={process.env.NEXT_PUBLIC_CDN_URL + memory.cover_image.object_key}
+          alt={memory.name}
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-105"
           sizes="300px"
@@ -146,11 +146,11 @@ export function DepthMemoryCard({
         >
           <div className="absolute bottom-0 left-0 right-0 p-4">
             <div className="relative inline-block mb-1">
-              <h3 className="font-serif text-lg text-white">{memory.title}</h3>
+              <h3 className="font-serif text-lg text-white">{memory.name}</h3>
               {hover && <Emphasis className="bg-white" />}
             </div>
             <p className="font-mono text-xs text-white/80">
-              {memory.capturedAt}
+              {String(memory.date)}
             </p>
             {memory.location && (
               <p className="font-mono text-xs text-white/60">

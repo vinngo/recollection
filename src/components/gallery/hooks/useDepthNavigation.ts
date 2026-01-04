@@ -7,7 +7,7 @@ interface UseDepthNavigationOptions {
   minDepth: number;
   maxDepth: number;
   sensitivity?: number;
-  containerRef?: React.RefObject<HTMLElement>;
+  containerRef?: React.RefObject<HTMLElement | null>;
 }
 
 interface UseDepthNavigationReturn {
@@ -28,38 +28,51 @@ export function useDepthNavigation({
   const touchStart = useRef<{ y: number; depth: number } | null>(null);
   const animationFrame = useRef<number | null>(null);
 
-  const animateToTarget = useCallback(() => {
-    setFocalDepth((current) => {
-      const newDepth = lerp(current, targetDepth.current, 0.15);
+  // Use ref to store animation function to avoid circular dependency
+  const animateRef = useRef<(() => void) | null>(null);
 
-      if (Math.abs(newDepth - targetDepth.current) < 0.5) {
-        animationFrame.current = null;
-        return targetDepth.current;
-      }
+  useEffect(() => {
+    animateRef.current = () => {
+      setFocalDepth((current) => {
+        const newDepth = lerp(current, targetDepth.current, 0.15);
 
-      animationFrame.current = requestAnimationFrame(animateToTarget);
-      return newDepth;
-    });
+        if (Math.abs(newDepth - targetDepth.current) < 0.5) {
+          animationFrame.current = null;
+          return targetDepth.current;
+        }
+
+        animationFrame.current = requestAnimationFrame(() =>
+          animateRef.current?.(),
+        );
+        return newDepth;
+      });
+    };
+  }, []);
+
+  const startAnimation = useCallback(() => {
+    if (!animationFrame.current) {
+      animationFrame.current = requestAnimationFrame(() =>
+        animateRef.current?.(),
+      );
+    }
   }, []);
 
   const updateTargetDepth = useCallback(
     (newTarget: number) => {
       targetDepth.current = clamp(newTarget, minDepth, maxDepth);
-
-      if (!animationFrame.current) {
-        animationFrame.current = requestAnimationFrame(animateToTarget);
-      }
+      startAnimation();
     },
-    [minDepth, maxDepth, animateToTarget],
+    [minDepth, maxDepth, startAnimation],
   );
 
   // Attach wheel listener with passive: false
   useEffect(() => {
     const element = containerRef?.current || window;
 
-    const handleWheel = (e: WheelEvent) => {
+    const handleWheel = (e: Event) => {
+      const wheelEvent = e as WheelEvent;
       e.preventDefault();
-      updateTargetDepth(targetDepth.current - e.deltaY * sensitivity);
+      updateTargetDepth(targetDepth.current - wheelEvent.deltaY * sensitivity);
     };
 
     element.addEventListener("wheel", handleWheel, { passive: false });

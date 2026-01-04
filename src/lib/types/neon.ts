@@ -3,7 +3,7 @@ export type Memory = {
   name: string;
   date: string;
   location: string;
-  cover_image?: {
+  cover_image: {
     id: string;
     object_key: string;
     caption: string;
