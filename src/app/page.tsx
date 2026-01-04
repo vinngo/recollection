@@ -6,10 +6,12 @@ import { DepthMemoryCard } from "@/components/gallery/DepthMemoryCard";
 import { useMemoryLayout } from "@/components/gallery/hooks/useMemoryLayout";
 import { useDepthNavigation } from "@/components/gallery/hooks/useDepthNavigation";
 import { Lightbox } from "@/components/gallery/Lightbox";
+import type { GalleryMemory } from "@/lib/types/neon";
 
 const DEPTH_RANGE = { min: -800, max: 0 };
 
-const mockMemories = [
+//replace with a db call
+const memories: GalleryMemory[] = [
   {
     id: "1",
     imageUrl:
@@ -61,9 +63,9 @@ const mockMemories = [
 ];
 
 export default function Home() {
-  const [selectedMemory, setSelectedMemory] = useState<
-    (typeof mockMemories)[0] | null
-  >(null);
+  const [selectedMemory, setSelectedMemory] = useState<GalleryMemory | null>(
+    null,
+  );
   const [viewport, setViewport] = useState({ width: 1200, height: 800 });
 
   const { focalDepth, setFocalDepth } = useDepthNavigation({
@@ -72,7 +74,7 @@ export default function Home() {
   });
 
   const memoryPositions = useMemoryLayout({
-    memories: mockMemories,
+    memories: memories,
     viewportWidth: viewport.width,
     viewportHeight: viewport.height,
     depthRange: DEPTH_RANGE,
@@ -91,7 +93,7 @@ export default function Home() {
     return () => window.removeEventListener("resize", updateViewport);
   }, []);
 
-  const handleMemoryClick = (memory: (typeof mockMemories)[0], z: number) => {
+  const handleMemoryClick = (memory: GalleryMemory, z: number) => {
     // Animate to the memory's depth, then open lightbox
     setFocalDepth(z);
     setTimeout(() => {
