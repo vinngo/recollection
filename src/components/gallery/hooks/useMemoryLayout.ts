@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
 export interface Memory {
   id: string;
@@ -47,20 +47,20 @@ function parseDate(dateStr: string): Date {
   return new Date(year, month, 1);
 }
 
+// Simple seeded random generator for consistent but pseudo-random positions
+function seededRandom(seed: number): number {
+  const x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+}
+
 export function useMemoryLayout({
   memories,
   viewportWidth,
   viewportHeight,
   depthRange,
 }: UseMemoryLayoutOptions): MemoryPosition[] {
-  // Generate random seed once on mount (stable across re-renders, random on page refresh)
-  const [randomSeed] = useState(() => Math.random());
-
   return useMemo(() => {
     if (memories.length === 0) return [];
-
-    // Use randomSeed to trigger recalculation
-    const _ = randomSeed;
 
     // Parse dates and find range
     const memoriesWithDates = memories.map((m) => ({
@@ -73,30 +73,37 @@ export function useMemoryLayout({
     const newestTime = Math.max(...dates);
     const timeRange = newestTime - oldestTime || 1;
 
-    // Calculate positions
     const padding = 150;
     const cardWidth = 280;
     const cardHeight = 280;
 
+    const availableWidth = Math.max(
+      viewportWidth - cardWidth - padding * 2,
+      100,
+    );
+    const availableHeight = Math.max(
+      viewportHeight - cardHeight - padding * 2,
+      100,
+    );
+
+    // Use a combination of viewport dimensions and memory count as seed
+    // This gives different layouts when viewport changes or memories change
+    const baseSeed =
+      viewportWidth * 0.1 + viewportHeight * 0.01 + memories.length;
+
     const positions: MemoryPosition[] = memoriesWithDates.map(
-      ({ memory, date }) => {
+      ({ memory, date }, index) => {
         // Z position: newest = max (foreground), oldest = min (background)
         const normalizedAge = (newestTime - date.getTime()) / timeRange;
         const z =
           depthRange.max - normalizedAge * (depthRange.max - depthRange.min);
 
-        // Random X and Y within viewport bounds
-        const availableWidth = Math.max(
-          viewportWidth - cardWidth - padding * 2,
-          100,
-        );
-        const availableHeight = Math.max(
-          viewportHeight - cardHeight - padding * 2,
-          100,
-        );
+        // Use seeded random for positions (deterministic but varies with viewport)
+        const seedX = baseSeed + index * 1.5;
+        const seedY = baseSeed + index * 2.7;
 
-        const x = padding + Math.random() * availableWidth;
-        const y = padding + Math.random() * availableHeight;
+        const x = padding + seededRandom(seedX) * availableWidth;
+        const y = padding + seededRandom(seedY) * availableHeight;
 
         return {
           memory,
@@ -109,5 +116,5 @@ export function useMemoryLayout({
 
     // Sort by Z so furthest renders first (painter's algorithm)
     return positions.sort((a, b) => a.z - b.z);
-  }, [memories, viewportWidth, viewportHeight, depthRange, randomSeed]);
+  }, [memories, viewportWidth, viewportHeight, depthRange]);
 }

@@ -66,7 +66,7 @@ export default function Home() {
   >(null);
   const [viewport, setViewport] = useState({ width: 1200, height: 800 });
 
-  const { focalDepth, setFocalDepth, handleWheel } = useDepthNavigation({
+  const { focalDepth, setFocalDepth } = useDepthNavigation({
     minDepth: DEPTH_RANGE.min,
     maxDepth: DEPTH_RANGE.max,
   });
@@ -107,7 +107,7 @@ export default function Home() {
           recollection
         </h1>
         <p className="font-mono text-sm text-muted-foreground mt-2">
-          scroll to explore
+          scroll to explore the z-axis
         </p>
       </header>
 
@@ -122,7 +122,7 @@ export default function Home() {
         </p>
       </div>
 
-      <DepthCanvas focalDepth={focalDepth} onWheel={handleWheel}>
+      <DepthCanvas focalDepth={focalDepth}>
         {memoryPositions.map((pos, index) => (
           <DepthMemoryCard
             key={pos.memory.id}
@@ -131,6 +131,8 @@ export default function Home() {
             focalDepth={focalDepth}
             onClick={() => handleMemoryClick(pos.memory, pos.z)}
             index={index}
+            viewportWidth={viewport.width}
+            viewportHeight={viewport.height}
           />
         ))}
       </DepthCanvas>

@@ -7,21 +7,18 @@ interface DepthCanvasProps {
   children: ReactNode;
   focalDepth: number;
   perspective?: number;
-  onWheel: (e: React.WheelEvent) => void;
 }
 
 export function DepthCanvas({
   children,
   focalDepth,
   perspective = 1000,
-  onWheel,
 }: DepthCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   return (
     <div
       ref={containerRef}
-      onWheel={onWheel}
       className="fixed inset-0 overflow-hidden"
       style={{
         perspective: `${perspective}px`,

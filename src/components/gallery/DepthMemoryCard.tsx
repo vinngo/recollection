@@ -14,6 +14,8 @@ interface DepthMemoryCardProps {
   focalRange?: number;
   onClick: () => void;
   index: number;
+  viewportWidth: number;
+  viewportHeight: number;
 }
 
 function generateFloatingAnimation(index: number) {
@@ -37,8 +39,13 @@ export function DepthMemoryCard({
   focalRange = 400,
   onClick,
   index,
+  viewportWidth,
+  viewportHeight,
 }: DepthMemoryCardProps) {
+  const cardWidth = 288; // w-72 = 18rem = 288px
+  const cardHeight = 288;
   const [hover, setHover] = useState<boolean>(false);
+  const [drag, setDrag] = useState<boolean>(false);
   const [floatAnimation, setFloatAnimation] = useState({
     duration: 10,
     xOffset: 0,
@@ -56,10 +63,31 @@ export function DepthMemoryCard({
 
   const isInFocus = effects.blur < 2;
 
+  const handleClick = () => {
+    if (!drag) {
+      onClick();
+    }
+  };
+
   return (
     <motion.div
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
+      drag
+      dragElastic={0.2}
+      dragMomentum
+      dragConstraints={{
+        left: -position.x,
+        right: viewportWidth - position.x - cardWidth,
+        top: -position.y,
+        bottom: viewportHeight - position.y - cardHeight,
+      }}
+      onDragStart={() => {
+        setDrag(true);
+      }}
+      onDragEnd={() => {
+        setDrag(false);
+      }}
       initial={{ opacity: 0, scale: 0.5, x: 0, y: 0 }}
       animate={{
         opacity: effects.opacity,
@@ -83,7 +111,7 @@ export function DepthMemoryCard({
           delay: index * 0.05,
         },
       }}
-      onClick={onClick}
+      onClick={handleClick}
       className="absolute cursor-pointer group"
       style={{
         left: position.x,
@@ -114,7 +142,7 @@ export function DepthMemoryCard({
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: isInFocus ? 1 : 0 }}
-          className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          className="absolute inset-0 bg-linear-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
         >
           <div className="absolute bottom-0 left-0 right-0 p-4">
             <div className="relative inline-block mb-1">
