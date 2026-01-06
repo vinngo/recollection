@@ -1,5 +1,5 @@
 import sql from "./client";
-import { Memory } from "../types/neon";
+import { Memory, Photo } from "../types/neon";
 
 export async function getMemories(): Promise<Memory[]> {
   const memories = await sql`
@@ -23,4 +23,17 @@ export async function getMemories(): Promise<Memory[]> {
     ORDER BY m.date DESC
   `;
   return memories.length > 0 ? (memories as Memory[]) : [];
+}
+
+export async function getPhotosByMemory(memoryId: string): Promise<Photo[]> {
+  const photos = await sql`
+    SELECT
+      id,
+      object_key,
+      caption
+    FROM images
+    WHERE memory_id = ${memoryId}
+    ORDER BY order_index ASC
+  `;
+  return photos.length > 0 ? (photos as Photo[]) : [];
 }

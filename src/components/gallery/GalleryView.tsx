@@ -5,8 +5,9 @@ import { DepthCanvas } from "@/components/gallery/DepthCanvas";
 import { DepthMemoryCard } from "@/components/gallery/DepthMemoryCard";
 import { useMemoryLayout } from "@/components/gallery/hooks/useMemoryLayout";
 import { useDepthNavigation } from "@/components/gallery/hooks/useDepthNavigation";
-import { Lightbox } from "@/components/gallery/Lightbox";
+import { Lightbox } from "@/components/gallery/lightbox/Lightbox";
 import type { Memory } from "@/lib/types/neon";
+import Link from "next/link";
 
 const DEPTH_RANGE = { min: -800, max: 0 };
 
@@ -73,6 +74,15 @@ export function GalleryView({ memories }: GalleryViewProps) {
         </p>
       </div>
 
+      <div className="fixed bottom-8 right-8 z-10">
+        <Link
+          href="https://vinngo.vercel.app"
+          className="font-mono text-xs text-muted-foreground"
+        >
+          by vincent ngo
+        </Link>
+      </div>
+
       <DepthCanvas focalDepth={focalDepth}>
         {memoryPositions.map((pos, index) => (
           <DepthMemoryCard
@@ -92,7 +102,7 @@ export function GalleryView({ memories }: GalleryViewProps) {
         <Lightbox
           isOpen={!!selectedMemory}
           onClose={() => setSelectedMemory(null)}
-          imageUrl={selectedMemory.cover_image?.object_key}
+          memoryId={selectedMemory.id}
           title={selectedMemory.name}
           capturedAt={selectedMemory.date}
           location={selectedMemory.location}
